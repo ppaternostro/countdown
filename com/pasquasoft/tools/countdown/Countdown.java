@@ -1,11 +1,31 @@
-import java.awt.*;
-import java.awt.event.*;
+package com.pasquasoft.tools.countdown;
 
-import javax.swing.*;
-import javax.swing.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Properties;
+import java.util.TimerTask;
 
-import java.util.*;
-
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 public class Countdown
 {
@@ -17,13 +37,17 @@ public class Countdown
 
 class CountdownFrame extends JFrame implements ActionListener
 {
-  //private static long SECONDS_IN_YEAR   = 31556926;
-  //private static long SECONDS_IN_MONTH  = 2629743;
-  private static long SECONDS_IN_WEEK   = 604800;
-  private static long SECONDS_IN_DAY    = 86400;
-  private static long SECONDS_IN_HOUR   = 3600;
+  /**
+   * Generated serial version UID.
+   */
+  private static final long serialVersionUID = 4657914421139681570L;
+  // private static long SECONDS_IN_YEAR = 31556926;
+  // private static long SECONDS_IN_MONTH = 2629743;
+  private static long SECONDS_IN_WEEK = 604800;
+  private static long SECONDS_IN_DAY = 86400;
+  private static long SECONDS_IN_HOUR = 3600;
   private static long SECONDS_IN_MINUTE = 60;
-  private static long MILLIS_IN_SECOND  = 1000;
+  private static long MILLIS_IN_SECOND = 1000;
 
   private DrawPanel drawPanel = new DrawPanel();
 
@@ -62,7 +86,7 @@ class CountdownFrame extends JFrame implements ActionListener
     /* Components should be added to the container's content pane */
     Container cp = getContentPane();
 
-    cp.add(BorderLayout.CENTER,drawPanel);
+    cp.add(BorderLayout.CENTER, drawPanel);
 
     /* Add menu items to menus */
     configure.add(configureStart);
@@ -83,12 +107,18 @@ class CountdownFrame extends JFrame implements ActionListener
     /* Add the menu listener */
     configure.addMenuListener(new MenuListener() {
 
-      public void menuCanceled(MenuEvent evt) {}
-      public void menuDeselected(MenuEvent evt) {}
+      public void menuCanceled(MenuEvent evt)
+      {
+      }
+
+      public void menuDeselected(MenuEvent evt)
+      {
+      }
 
       public void menuSelected(MenuEvent evt)
       {
-        configureStart.setEnabled(date != null && !date.equals("") && !configureStop.isEnabled());
+        configureStart.setEnabled(
+            date != null && !date.equals("") && !configureStop.isEnabled());
       }
     });
 
@@ -100,8 +130,7 @@ class CountdownFrame extends JFrame implements ActionListener
     helpAbout.addActionListener(this);
 
     /* Add the window listener */
-    addWindowListener(new WindowAdapter()
-    {
+    addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent evt)
       {
         /* Exit gracefully */
@@ -116,12 +145,13 @@ class CountdownFrame extends JFrame implements ActionListener
     });
 
     /* Size the frame */
-    setSize(400,200);
+    setSize(400, 200);
 
     /* Center the frame */
     Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
     Rectangle frameDim = getBounds();
-    setLocation((screenDim.width - frameDim.width) / 2,(screenDim.height - frameDim.height) / 2);
+    setLocation((screenDim.width - frameDim.width) / 2,
+        (screenDim.height - frameDim.height) / 2);
 
     /* Show the frame */
     setVisible(true);
@@ -133,23 +163,21 @@ class CountdownFrame extends JFrame implements ActionListener
 
     if (obj == configureSettings)
     {
-      new SettingsDialog(this,"Settings",true,prop);
+      new SettingsDialog(this, "Settings", true, prop);
 
       date = prop.getProperty("countdown.date");
       time = prop.getProperty("countdown.time");
     }
     else if (obj == configureStart)
     {
-      countdownMillis = calculateMillis(date,time);
+      countdownMillis = calculateMillis(date, time);
       currentDateMillis = Calendar.getInstance().getTimeInMillis();
 
       if (currentDateMillis >= countdownMillis)
       {
-        JOptionPane.showMessageDialog(
-          CountdownFrame.this,
-          "Configured date and time have passed.",
-          "Countdown",
-          JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(CountdownFrame.this,
+            "Configured date and time have passed.", "Countdown",
+            JOptionPane.INFORMATION_MESSAGE);
       }
       else
       {
@@ -160,7 +188,7 @@ class CountdownFrame extends JFrame implements ActionListener
         textStr = prop.getProperty("countdown.text");
 
         countdownTimer = new java.util.Timer();
-        countdownTimer.scheduleAtFixedRate(new CountdownTask(),0,1000);
+        countdownTimer.scheduleAtFixedRate(new CountdownTask(), 0, 1000);
       }
     }
     else if (obj == configureStop)
@@ -173,15 +201,13 @@ class CountdownFrame extends JFrame implements ActionListener
     }
     else if (obj == configureExit)
     {
-      dispatchEvent(new WindowEvent(this,WindowEvent.WINDOW_CLOSING));
+      dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
     else if (obj == helpAbout)
     {
-      JOptionPane.showMessageDialog(
-        this,
-        "<html><center>Countdown Application<br>Pat Paternostro<br>Copyright © 2005</center></html>",
-        "About Countdown",
-        JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(this,
+          "<html><center>Countdown Application<br>Pat Paternostro<br>Copyright ï¿½ 2005</center></html>",
+          "About Countdown", JOptionPane.INFORMATION_MESSAGE);
     }
   }
 
@@ -192,15 +218,19 @@ class CountdownFrame extends JFrame implements ActionListener
 
     if (timeParts.length < 2)
     {
-      timeParts = new String[] {"12","00"};
+      timeParts = new String[] { "12", "00" };
     }
 
-    GregorianCalendar calendar =
-      new GregorianCalendar(
-        Integer.parseInt(dateParts[2]),
-        Integer.parseInt(dateParts[0]) - 1, //Month value is 0-based (e.g., 0 for January)
-        Integer.parseInt(dateParts[1]),
-        Integer.parseInt(timeParts[0]),
+    GregorianCalendar calendar = new GregorianCalendar(
+        Integer.parseInt(dateParts[2]), Integer.parseInt(dateParts[0]) - 1, // Month
+                                                                            // value
+                                                                            // is
+                                                                            // 0-based
+                                                                            // (e.g.,
+                                                                            // 0
+                                                                            // for
+                                                                            // January)
+        Integer.parseInt(dateParts[1]), Integer.parseInt(timeParts[0]),
         Integer.parseInt(timeParts[1]));
 
     return calendar.getTimeInMillis();
@@ -208,6 +238,11 @@ class CountdownFrame extends JFrame implements ActionListener
 
   private class DrawPanel extends JPanel
   {
+    /**
+     * Generated serial version UID.
+     */
+    private static final long serialVersionUID = -6102645309158997819L;
+
     public void paintComponent(Graphics g)
     {
       if (countdownMillis != 0 && countdownMillis > currentDateMillis)
@@ -217,41 +252,42 @@ class CountdownFrame extends JFrame implements ActionListener
         int width = getWidth();
         int height = getHeight();
 
-        Color color = Color.decode(prop.getProperty("countdown.color","0"));
+        Color color = Color.decode(prop.getProperty("countdown.color", "0"));
 
         g.setColor(color);
-        g.setFont(new Font("Arial",Font.BOLD,20));
+        g.setFont(new Font("Arial", Font.BOLD, 20));
 
-        long diffInSeconds = (countdownMillis - currentDateMillis)/MILLIS_IN_SECOND;
+        long diffInSeconds = (countdownMillis - currentDateMillis)
+            / MILLIS_IN_SECOND;
 
-        //int years = (int) (diffInSeconds/SECONDS_IN_YEAR);
-        //diffInSeconds -= years * SECONDS_IN_YEAR;
+        // int years = (int) (diffInSeconds/SECONDS_IN_YEAR);
+        // diffInSeconds -= years * SECONDS_IN_YEAR;
 
-        //int months = (int) (diffInSeconds/SECONDS_IN_MONTH);
-        //diffInSeconds -= months * SECONDS_IN_MONTH;
+        // int months = (int) (diffInSeconds/SECONDS_IN_MONTH);
+        // diffInSeconds -= months * SECONDS_IN_MONTH;
 
-        int weeks = (int) (diffInSeconds/SECONDS_IN_WEEK);
+        int weeks = (int) (diffInSeconds / SECONDS_IN_WEEK);
         diffInSeconds -= weeks * SECONDS_IN_WEEK;
 
-        int days = (int) (diffInSeconds/SECONDS_IN_DAY);
+        int days = (int) (diffInSeconds / SECONDS_IN_DAY);
         diffInSeconds -= days * SECONDS_IN_DAY;
 
-        int hours = (int) (diffInSeconds/SECONDS_IN_HOUR);
+        int hours = (int) (diffInSeconds / SECONDS_IN_HOUR);
         diffInSeconds -= hours * SECONDS_IN_HOUR;
 
-        int minutes = (int) (diffInSeconds/SECONDS_IN_MINUTE);
+        int minutes = (int) (diffInSeconds / SECONDS_IN_MINUTE);
         diffInSeconds -= minutes * SECONDS_IN_MINUTE;
 
         int seconds = (int) diffInSeconds;
 
         String dateStr =
-          //(years != 0 ? years + " year(s) " : "") +
-          //(months != 0 ? months + " month(s) " : "") +
-          (weeks != 0 ? weeks + " week(s) " : "") +
-          (days != 0 ? days + " day(s) " : "") +
-          (hours != 0 ? hours + " hour(s) " : "") +
-          (minutes != 0 ? minutes + " minute(s) " : "") +
-          seconds + " second(s) ";
+            // (years != 0 ? years + " year(s) " : "") +
+            // (months != 0 ? months + " month(s) " : "") +
+            (weeks != 0 ? weeks + " week(s) " : "")
+                + (days != 0 ? days + " day(s) " : "")
+                + (hours != 0 ? hours + " hour(s) " : "")
+                + (minutes != 0 ? minutes + " minute(s) " : "") + seconds
+                + " second(s) ";
 
         /* Retrieve string width for centering purposes */
         FontMetrics fm = g.getFontMetrics();
@@ -261,10 +297,11 @@ class CountdownFrame extends JFrame implements ActionListener
         if (textStr != null && !textStr.equals(""))
         {
           int textStrWidth = fm.stringWidth(textStr);
-          g.drawString(textStr,(width - textStrWidth)/2,height/2 - textHeight);
+          g.drawString(textStr, (width - textStrWidth) / 2,
+              height / 2 - textHeight);
         }
 
-        g.drawString(dateStr,(width - dateStrWidth)/2,height/2);
+        g.drawString(dateStr, (width - dateStrWidth) / 2, height / 2);
       }
     }
   }
@@ -281,13 +318,10 @@ class CountdownFrame extends JFrame implements ActionListener
       {
         CountdownFrame.this.configureStop.doClick();
 
-        JOptionPane.showMessageDialog(
-          CountdownFrame.this,
-          "<html><center><i>My friend, the end is near<br>And so I face the final curtain</i><br>Frank Sinatra - My Way</center></html>",
-          "Countdown",
-          JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(CountdownFrame.this,
+            "<html><center><i>My friend, the end is near<br>And so I face the final curtain</i><br>Frank Sinatra - My Way</center></html>",
+            "Countdown", JOptionPane.INFORMATION_MESSAGE);
       }
     }
   }
 }
-

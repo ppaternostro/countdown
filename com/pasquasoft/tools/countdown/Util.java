@@ -1,8 +1,9 @@
-import java.io.*;
+package com.pasquasoft.tools.countdown;
 
-import java.util.*;
-
-import javax.swing.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 public class Util
 {
@@ -15,7 +16,7 @@ public class Util
     try
     {
       fos = new FileOutputStream(PROP_FILE);
-      prop.store(fos,null);
+      prop.store(fos, null);
     }
     finally
     {
@@ -26,9 +27,9 @@ public class Util
           fos.close();
         }
       }
-      catch(IOException ioe)
+      catch (IOException ioe)
       {
-        //No blood, no foul!
+        // No blood, no foul!
       }
     }
   }
@@ -43,9 +44,9 @@ public class Util
       fis = new FileInputStream(PROP_FILE);
       prop.load(fis);
     }
-    catch(IOException ioe)
+    catch (IOException ioe)
     {
-      //Ignore as properties file may not yet exist.
+      // Ignore as properties file may not yet exist.
     }
     finally
     {
@@ -56,9 +57,9 @@ public class Util
           fis.close();
         }
       }
-      catch(IOException ioe)
+      catch (IOException ioe)
       {
-        //No blood, no foul!
+        // No blood, no foul!
       }
     }
 
