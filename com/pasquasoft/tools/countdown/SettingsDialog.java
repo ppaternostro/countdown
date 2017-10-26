@@ -3,12 +3,11 @@ package com.pasquasoft.tools.countdown;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Label;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -71,15 +70,21 @@ public class SettingsDialog extends JDialog implements ActionListener
 
     textField.setText(prop.getProperty("countdown.text"));
 
-    center.setLayout(new GridLayout(4, 2));
-    center.add(new Label("Countdown Date:"));
-    center.add(dateField);
-    center.add(new Label("Countdown Time:"));
-    center.add(timeField);
-    center.add(new Label("Countdown Text:"));
-    center.add(textField);
-    center.add(new Label("Text Color:"));
-    center.add(colorChooser);
+    GridBagLayout gbl = new GridBagLayout();
+    GridBagConstraints gbc = new GridBagConstraints();
+
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.insets = new Insets(3, 3, 3, 3);
+
+    center.setLayout(gbl);
+    center.add(new Label("Countdown Date:"), contraintsHelper(gbc, 0, 0));
+    center.add(dateField, contraintsHelper(gbc, 1, 0));
+    center.add(new Label("Countdown Time:"), contraintsHelper(gbc, 0, 1));
+    center.add(timeField, contraintsHelper(gbc, 1, 1));
+    center.add(new Label("Countdown Text:"), contraintsHelper(gbc, 0, 2));
+    center.add(textField, contraintsHelper(gbc, 1, 2));
+    center.add(new Label("Text Color:"), contraintsHelper(gbc, 0, 3));
+    center.add(colorChooser, contraintsHelper(gbc, 1, 3));
 
     south.add(ok);
     south.add(cancel);
@@ -108,18 +113,23 @@ public class SettingsDialog extends JDialog implements ActionListener
     getRootPane().setDefaultButton(ok);
 
     /* Size the dialog */
-    setSize(300, 170);
+    pack();
 
     /* Center the dialog */
-    Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
-    Rectangle frameDim = getBounds();
-    setLocation((screenDim.width - frameDim.width) / 2,
-        (screenDim.height - frameDim.height) / 2);
+    setLocationRelativeTo(owner);
 
     setResizable(false);
 
     /* Show the dialog */
     setVisible(true);
+  }
+
+  private Object contraintsHelper(GridBagConstraints gbc, int x, int y)
+  {
+    gbc.gridx = x;
+    gbc.gridy = y;
+
+    return gbc;
   }
 
   public void actionPerformed(ActionEvent evt)
