@@ -77,14 +77,14 @@ public class SettingsDialog extends JDialog implements ActionListener
     gbc.insets = new Insets(3, 3, 3, 3);
 
     center.setLayout(gbl);
-    center.add(new Label("Countdown Date:"), contraintsHelper(gbc, 0, 0));
-    center.add(dateField, contraintsHelper(gbc, 1, 0));
-    center.add(new Label("Countdown Time:"), contraintsHelper(gbc, 0, 1));
-    center.add(timeField, contraintsHelper(gbc, 1, 1));
-    center.add(new Label("Countdown Text:"), contraintsHelper(gbc, 0, 2));
-    center.add(textField, contraintsHelper(gbc, 1, 2));
-    center.add(new Label("Text Color:"), contraintsHelper(gbc, 0, 3));
-    center.add(colorChooser, contraintsHelper(gbc, 1, 3));
+    center.add(new Label("Countdown Date:"), constraintsHelper(gbc, 0, 0));
+    center.add(dateField, constraintsHelper(gbc, 1, 0));
+    center.add(new Label("Countdown Time:"), constraintsHelper(gbc, 0, 1));
+    center.add(timeField, constraintsHelper(gbc, 1, 1));
+    center.add(new Label("Countdown Text:"), constraintsHelper(gbc, 0, 2));
+    center.add(textField, constraintsHelper(gbc, 1, 2));
+    center.add(new Label("Text Color:"), constraintsHelper(gbc, 0, 3));
+    center.add(colorChooser, constraintsHelper(gbc, 1, 3));
 
     south.add(ok);
     south.add(cancel);
@@ -124,7 +124,7 @@ public class SettingsDialog extends JDialog implements ActionListener
     setVisible(true);
   }
 
-  private Object contraintsHelper(GridBagConstraints gbc, int x, int y)
+  private Object constraintsHelper(GridBagConstraints gbc, int x, int y)
   {
     gbc.gridx = x;
     gbc.gridy = y;
