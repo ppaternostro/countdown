@@ -3,19 +3,19 @@ package com.pasquasoft.tools.countdown;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.TimerTask;
 
 import javax.swing.JFrame;
@@ -33,13 +33,14 @@ public class CountdownFrame extends JFrame implements ActionListener
    * Generated serial version UID.
    */
   private static final long serialVersionUID = 4657914421139681570L;
-  // private static long SECONDS_IN_YEAR = 31556926;
-  // private static long SECONDS_IN_MONTH = 2629743;
-  private static long SECONDS_IN_WEEK = 604800;
-  private static long SECONDS_IN_DAY = 86400;
-  private static long SECONDS_IN_HOUR = 3600;
-  private static long SECONDS_IN_MINUTE = 60;
-  private static long MILLIS_IN_SECOND = 1000;
+
+  private static final long SECONDS_IN_YEAR = 31556926;
+  private static final long SECONDS_IN_MONTH = 2629743;
+  private static final long SECONDS_IN_WEEK = 604800;
+  private static final long SECONDS_IN_DAY = 86400;
+  private static final long SECONDS_IN_HOUR = 3600;
+  private static final long SECONDS_IN_MINUTE = 60;
+  private static final long MILLIS_IN_SECOND = 1000;
 
   private DrawPanel drawPanel = new DrawPanel();
 
@@ -109,8 +110,7 @@ public class CountdownFrame extends JFrame implements ActionListener
 
       public void menuSelected(MenuEvent evt)
       {
-        configureStart.setEnabled(
-            date != null && !date.equals("") && !configureStop.isEnabled());
+        configureStart.setEnabled(date != null && !date.equals("") && !configureStop.isEnabled());
       }
     });
 
@@ -140,10 +140,7 @@ public class CountdownFrame extends JFrame implements ActionListener
     setSize(400, 200);
 
     /* Center the frame */
-    Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
-    Rectangle frameDim = getBounds();
-    setLocation((screenDim.width - frameDim.width) / 2,
-        (screenDim.height - frameDim.height) / 2);
+    setLocationRelativeTo(null);
 
     /* Show the frame */
     setVisible(true);
@@ -163,12 +160,12 @@ public class CountdownFrame extends JFrame implements ActionListener
     else if (obj == configureStart)
     {
       countdownMillis = calculateMillis(date, time);
-      currentDateMillis = Calendar.getInstance().getTimeInMillis();
+      currentDateMillis = ZonedDateTime.ofInstant(Instant.now(), TimeZone.getDefault().toZoneId()).toInstant()
+          .toEpochMilli();
 
       if (currentDateMillis >= countdownMillis)
       {
-        JOptionPane.showMessageDialog(CountdownFrame.this,
-            "Configured date and/or time has passed.", "Countdown",
+        JOptionPane.showMessageDialog(CountdownFrame.this, "Configured date and/or time has passed.", "Countdown",
             JOptionPane.INFORMATION_MESSAGE);
       }
       else
@@ -198,7 +195,7 @@ public class CountdownFrame extends JFrame implements ActionListener
     else if (obj == helpAbout)
     {
       JOptionPane.showMessageDialog(this,
-          "<html><center>Countdown Application<br>Pat Paternostro<br>Copyright &copy; 2005</center></html>",
+          "<html><center>Countdown Application<br>Pat Paternostro<br>Copyright &copy; 2005-2022</center></html>",
           "About Countdown", JOptionPane.INFORMATION_MESSAGE);
     }
   }
@@ -213,15 +210,11 @@ public class CountdownFrame extends JFrame implements ActionListener
       timeParts = new String[] { "12", "00" };
     }
 
-    GregorianCalendar calendar = new GregorianCalendar(
-        Integer.parseInt(dateParts[2]),
-        // Month value is 0-based (e.g., 0 for January)
-        Integer.parseInt(dateParts[0]) - 1,
-        Integer.parseInt(dateParts[1]),
-        Integer.parseInt(timeParts[0]),
-        Integer.parseInt(timeParts[1]));
+    ZonedDateTime calendar = ZonedDateTime.of(
+        LocalDate.of(Integer.parseInt(dateParts[2]), Integer.parseInt(dateParts[0]), Integer.parseInt(dateParts[1])),
+        LocalTime.of(Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1])), TimeZone.getDefault().toZoneId());
 
-    return calendar.getTimeInMillis();
+    return calendar.toInstant().toEpochMilli();
   }
 
   private class DrawPanel extends JPanel
@@ -245,14 +238,13 @@ public class CountdownFrame extends JFrame implements ActionListener
         g.setColor(color);
         g.setFont(new Font("Arial", Font.BOLD, 20));
 
-        long diffInSeconds = (countdownMillis - currentDateMillis)
-            / MILLIS_IN_SECOND;
+        long diffInSeconds = (countdownMillis - currentDateMillis) / MILLIS_IN_SECOND;
 
-        // int years = (int) (diffInSeconds/SECONDS_IN_YEAR);
-        // diffInSeconds -= years * SECONDS_IN_YEAR;
+        int years = (int) (diffInSeconds / SECONDS_IN_YEAR);
+        diffInSeconds -= years * SECONDS_IN_YEAR;
 
-        // int months = (int) (diffInSeconds/SECONDS_IN_MONTH);
-        // diffInSeconds -= months * SECONDS_IN_MONTH;
+        int months = (int) (diffInSeconds / SECONDS_IN_MONTH);
+        diffInSeconds -= months * SECONDS_IN_MONTH;
 
         int weeks = (int) (diffInSeconds / SECONDS_IN_WEEK);
         diffInSeconds -= weeks * SECONDS_IN_WEEK;
@@ -268,14 +260,10 @@ public class CountdownFrame extends JFrame implements ActionListener
 
         int seconds = (int) diffInSeconds;
 
-        String dateStr =
-            // (years != 0 ? years + " year(s) " : "") +
-            // (months != 0 ? months + " month(s) " : "") +
-            (weeks != 0 ? weeks + " week(s) " : "")
-                + (days != 0 ? days + " day(s) " : "")
-                + (hours != 0 ? hours + " hour(s) " : "")
-                + (minutes != 0 ? minutes + " minute(s) " : "") + seconds
-                + " second(s) ";
+        String dateStr = (years != 0 ? years + " year(s) " : "") + (months != 0 ? months + " month(s) " : "")
+            + (weeks != 0 ? weeks + " week(s) " : "") + (days != 0 ? days + " day(s) " : "")
+            + (hours != 0 ? hours + " hour(s) " : "") + (minutes != 0 ? minutes + " minute(s) " : "") + seconds
+            + " second(s) ";
 
         /* Retrieve string width for centering purposes */
         FontMetrics fm = g.getFontMetrics();
@@ -285,8 +273,7 @@ public class CountdownFrame extends JFrame implements ActionListener
         if (textStr != null && !textStr.equals(""))
         {
           int textStrWidth = fm.stringWidth(textStr);
-          g.drawString(textStr, (width - textStrWidth) / 2,
-              height / 2 - textHeight);
+          g.drawString(textStr, (width - textStrWidth) / 2, height / 2 - textHeight);
         }
 
         g.drawString(dateStr, (width - dateStrWidth) / 2, height / 2);
@@ -298,7 +285,8 @@ public class CountdownFrame extends JFrame implements ActionListener
   {
     public void run()
     {
-      currentDateMillis = Calendar.getInstance().getTimeInMillis();
+      currentDateMillis = ZonedDateTime.ofInstant(Instant.now(), TimeZone.getDefault().toZoneId()).toInstant()
+          .toEpochMilli();
 
       CountdownFrame.this.drawPanel.repaint();
 
