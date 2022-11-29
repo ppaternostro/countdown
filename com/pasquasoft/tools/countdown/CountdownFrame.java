@@ -62,6 +62,8 @@ public class CountdownFrame extends JFrame implements ActionListener
   private String time;
   private String textStr;
 
+  private TimerStatus timerStatus = TimerStatus.IDLE;
+
   private Properties prop = Util.readProperties();
 
   private java.util.Timer countdownTimer;
@@ -184,6 +186,12 @@ public class CountdownFrame extends JFrame implements ActionListener
     {
       countdownTimer.cancel();
 
+      countdownMillis = 0;
+
+      timerStatus = TimerStatus.STOPPED;
+
+      drawPanel.repaint();
+
       configureSettings.setEnabled(true);
       configureStart.setEnabled(true);
       configureStop.setEnabled(false);
@@ -226,7 +234,12 @@ public class CountdownFrame extends JFrame implements ActionListener
 
     public void paintComponent(Graphics g)
     {
-      if (countdownMillis != 0 && countdownMillis > currentDateMillis)
+      if (timerStatus == TimerStatus.STOPPED)
+      {
+        g.clearRect(0, 0, getWidth(), getHeight());
+        timerStatus = TimerStatus.IDLE;
+      }
+      else if (countdownMillis != 0 && countdownMillis > currentDateMillis)
       {
         super.paintComponent(g);
 
