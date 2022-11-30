@@ -34,8 +34,8 @@ public class CountdownFrame extends JFrame implements ActionListener
    */
   private static final long serialVersionUID = 4657914421139681570L;
 
-  private static final long SECONDS_IN_YEAR = 31556926;
-  private static final long SECONDS_IN_MONTH = 2629743;
+  private static final long SECONDS_IN_YEAR = 31557600;
+  private static final long SECONDS_IN_MONTH = 2629800;
   private static final long SECONDS_IN_WEEK = 604800;
   private static final long SECONDS_IN_DAY = 86400;
   private static final long SECONDS_IN_HOUR = 3600;
@@ -253,25 +253,25 @@ public class CountdownFrame extends JFrame implements ActionListener
 
         long diffInSeconds = (countdownMillis - currentDateMillis) / MILLIS_IN_SECOND;
 
-        int years = (int) (diffInSeconds / SECONDS_IN_YEAR);
-        diffInSeconds -= years * SECONDS_IN_YEAR;
+        long years = diffInSeconds / SECONDS_IN_YEAR;
+        diffInSeconds %= SECONDS_IN_YEAR;
 
-        int months = (int) (diffInSeconds / SECONDS_IN_MONTH);
-        diffInSeconds -= months * SECONDS_IN_MONTH;
+        long months = diffInSeconds / SECONDS_IN_MONTH;
+        diffInSeconds %= SECONDS_IN_MONTH;
 
-        int weeks = (int) (diffInSeconds / SECONDS_IN_WEEK);
-        diffInSeconds -= weeks * SECONDS_IN_WEEK;
+        long weeks = diffInSeconds / SECONDS_IN_WEEK;
+        diffInSeconds %= SECONDS_IN_WEEK;
 
-        int days = (int) (diffInSeconds / SECONDS_IN_DAY);
-        diffInSeconds -= days * SECONDS_IN_DAY;
+        long days = diffInSeconds / SECONDS_IN_DAY;
+        diffInSeconds %= SECONDS_IN_DAY;
 
-        int hours = (int) (diffInSeconds / SECONDS_IN_HOUR);
-        diffInSeconds -= hours * SECONDS_IN_HOUR;
+        long hours = diffInSeconds / SECONDS_IN_HOUR;
+        diffInSeconds %= SECONDS_IN_HOUR;
 
-        int minutes = (int) (diffInSeconds / SECONDS_IN_MINUTE);
-        diffInSeconds -= minutes * SECONDS_IN_MINUTE;
+        long minutes = diffInSeconds / SECONDS_IN_MINUTE;
+        diffInSeconds %= SECONDS_IN_MINUTE;
 
-        int seconds = (int) diffInSeconds;
+        long seconds = diffInSeconds;
 
         String dateStr = (years != 0 ? years + " year(s) " : "") + (months != 0 ? months + " month(s) " : "")
             + (weeks != 0 ? weeks + " week(s) " : "") + (days != 0 ? days + " day(s) " : "")
