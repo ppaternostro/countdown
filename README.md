@@ -3,11 +3,11 @@ A countdown application.
 
 ![image](https://user-images.githubusercontent.com/32653184/204151587-3018db3c-24a4-4e7f-816a-7f2628fe603a.png)
 
-This application allows the user to set a specific date, time (in 24 hour format), message and message color by choosing the **Configure->Settings...** menu item which will display the below dialog.
+This application allows the user to set a specific date, time (in 24 hour format), message (optional) and message color (optional) by choosing the **Configure->Settings...** menu item which will display the below dialog.
 
-![image](https://user-images.githubusercontent.com/32653184/204166822-ff58a0c9-b392-4bc4-b224-67676d904bc0.png)
+![image](https://user-images.githubusercontent.com/32653184/204885540-e18392f3-17c2-4a8a-ae5d-52ec1e452b2e.png)
 
-After the countdown data is entered and validated (via the dialog **OK** button), the application will persist the data in a **countdown.properties** file located in the same folder location the application was launched.
+After the countdown data is entered and validated (date and time validation is triggered via the dialog **OK** button), the application will persist the data in a **countdown.properties** file located in the same folder location the application was launched.
 
 To start the countdown select the **Configure->Start** menu item which will display the configured message and countdown in the main window as below.
 

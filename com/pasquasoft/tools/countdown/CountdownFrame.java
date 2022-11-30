@@ -74,7 +74,6 @@ public class CountdownFrame extends JFrame implements ActionListener
     date = prop.getProperty("countdown.date");
     time = prop.getProperty("countdown.time");
 
-    configureStart.setEnabled(date != null && !date.equals(""));
     configureStop.setEnabled(false);
 
     /* Components should be added to the container's content pane */
@@ -111,7 +110,7 @@ public class CountdownFrame extends JFrame implements ActionListener
 
       public void menuSelected(MenuEvent evt)
       {
-        configureStart.setEnabled(date != null && !date.equals("") && !configureStop.isEnabled());
+        configureStart.setEnabled(isValidConfigData() && !configureStop.isEnabled());
       }
     });
 
@@ -211,16 +210,16 @@ public class CountdownFrame extends JFrame implements ActionListener
     String dateParts[] = date.split("/");
     String timeParts[] = time.split(":");
 
-    if (timeParts.length < 2)
-    {
-      timeParts = new String[] { "12", "00" };
-    }
-
     ZonedDateTime calendar = ZonedDateTime.of(
         LocalDate.of(Integer.parseInt(dateParts[2]), Integer.parseInt(dateParts[0]), Integer.parseInt(dateParts[1])),
         LocalTime.of(Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1])), TimeZone.getDefault().toZoneId());
 
     return calendar.toEpochSecond();
+  }
+
+  private boolean isValidConfigData()
+  {
+    return Util.isValidDate(date) && Util.isValidTime(time);
   }
 
   private class DrawPanel extends JPanel
