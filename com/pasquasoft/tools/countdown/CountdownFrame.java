@@ -40,7 +40,6 @@ public class CountdownFrame extends JFrame implements ActionListener
   private static final long SECONDS_IN_DAY = 86400;
   private static final long SECONDS_IN_HOUR = 3600;
   private static final long SECONDS_IN_MINUTE = 60;
-  private static final long MILLIS_IN_SECOND = 1000;
 
   private DrawPanel drawPanel = new DrawPanel();
 
@@ -55,8 +54,8 @@ public class CountdownFrame extends JFrame implements ActionListener
   private JMenuItem configureExit = new JMenuItem("Exit");
   private JMenuItem helpAbout = new JMenuItem("About...");
 
-  private long countdownMillis;
-  private long currentDateMillis;
+  private long countdownSeconds;
+  private long currentDateSeconds;
 
   private String date;
   private String time;
@@ -161,11 +160,10 @@ public class CountdownFrame extends JFrame implements ActionListener
     }
     else if (obj == configureStart)
     {
-      countdownMillis = calculateMillis(date, time);
-      currentDateMillis = ZonedDateTime.ofInstant(Instant.now(), TimeZone.getDefault().toZoneId()).toInstant()
-          .toEpochMilli();
+      countdownSeconds = calculateSeconds(date, time);
+      currentDateSeconds = ZonedDateTime.ofInstant(Instant.now(), TimeZone.getDefault().toZoneId()).toEpochSecond();
 
-      if (currentDateMillis >= countdownMillis)
+      if (currentDateSeconds >= countdownSeconds)
       {
         JOptionPane.showMessageDialog(CountdownFrame.this, "Configured date and/or time has passed.", "Countdown",
             JOptionPane.INFORMATION_MESSAGE);
@@ -186,7 +184,7 @@ public class CountdownFrame extends JFrame implements ActionListener
     {
       countdownTimer.cancel();
 
-      countdownMillis = 0;
+      countdownSeconds = 0;
 
       timerStatus = TimerStatus.STOPPED;
 
@@ -208,7 +206,7 @@ public class CountdownFrame extends JFrame implements ActionListener
     }
   }
 
-  private long calculateMillis(String date, String time)
+  private long calculateSeconds(String date, String time)
   {
     String dateParts[] = date.split("/");
     String timeParts[] = time.split(":");
@@ -222,7 +220,7 @@ public class CountdownFrame extends JFrame implements ActionListener
         LocalDate.of(Integer.parseInt(dateParts[2]), Integer.parseInt(dateParts[0]), Integer.parseInt(dateParts[1])),
         LocalTime.of(Integer.parseInt(timeParts[0]), Integer.parseInt(timeParts[1])), TimeZone.getDefault().toZoneId());
 
-    return calendar.toInstant().toEpochMilli();
+    return calendar.toEpochSecond();
   }
 
   private class DrawPanel extends JPanel
@@ -239,7 +237,7 @@ public class CountdownFrame extends JFrame implements ActionListener
         g.clearRect(0, 0, getWidth(), getHeight());
         timerStatus = TimerStatus.IDLE;
       }
-      else if (countdownMillis != 0 && countdownMillis > currentDateMillis)
+      else if (countdownSeconds != 0 && countdownSeconds > currentDateSeconds)
       {
         super.paintComponent(g);
 
@@ -251,7 +249,7 @@ public class CountdownFrame extends JFrame implements ActionListener
         g.setColor(color);
         g.setFont(new Font("Arial", Font.BOLD, 20));
 
-        long diffInSeconds = (countdownMillis - currentDateMillis) / MILLIS_IN_SECOND;
+        long diffInSeconds = countdownSeconds - currentDateSeconds;
 
         long years = diffInSeconds / SECONDS_IN_YEAR;
         diffInSeconds %= SECONDS_IN_YEAR;
@@ -298,12 +296,11 @@ public class CountdownFrame extends JFrame implements ActionListener
   {
     public void run()
     {
-      currentDateMillis = ZonedDateTime.ofInstant(Instant.now(), TimeZone.getDefault().toZoneId()).toInstant()
-          .toEpochMilli();
+      currentDateSeconds = ZonedDateTime.ofInstant(Instant.now(), TimeZone.getDefault().toZoneId()).toEpochSecond();
 
       CountdownFrame.this.drawPanel.repaint();
 
-      if (currentDateMillis >= countdownMillis)
+      if (currentDateSeconds >= countdownSeconds)
       {
         CountdownFrame.this.configureStop.doClick();
 
