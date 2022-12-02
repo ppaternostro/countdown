@@ -61,8 +61,6 @@ public class CountdownFrame extends JFrame implements ActionListener
   private String time;
   private String textStr;
 
-  private TimerStatus timerStatus = TimerStatus.IDLE;
-
   private Properties prop = Util.readProperties();
 
   private java.util.Timer countdownTimer;
@@ -164,7 +162,7 @@ public class CountdownFrame extends JFrame implements ActionListener
 
       if (currentDateSeconds >= countdownSeconds)
       {
-        JOptionPane.showMessageDialog(CountdownFrame.this, "Configured date and/or time has passed.", "Countdown",
+        JOptionPane.showMessageDialog(CountdownFrame.this, "Configured date and/or time has passed.", "Error",
             JOptionPane.INFORMATION_MESSAGE);
       }
       else
@@ -184,8 +182,6 @@ public class CountdownFrame extends JFrame implements ActionListener
       countdownTimer.cancel();
 
       countdownSeconds = 0;
-
-      timerStatus = TimerStatus.STOPPED;
 
       drawPanel.repaint();
 
@@ -231,15 +227,10 @@ public class CountdownFrame extends JFrame implements ActionListener
 
     public void paintComponent(Graphics g)
     {
-      if (timerStatus == TimerStatus.STOPPED)
-      {
-        g.clearRect(0, 0, getWidth(), getHeight());
-        timerStatus = TimerStatus.IDLE;
-      }
-      else if (countdownSeconds != 0 && countdownSeconds > currentDateSeconds)
-      {
-        super.paintComponent(g);
+      super.paintComponent(g);
 
+      if (countdownSeconds != 0 && countdownSeconds > currentDateSeconds)
+      {
         int width = getWidth();
         int height = getHeight();
 
