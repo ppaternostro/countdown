@@ -7,7 +7,7 @@ This application allows the user to set a specific date, time (in 24 hour format
 
 ![image](https://user-images.githubusercontent.com/32653184/204885540-e18392f3-17c2-4a8a-ae5d-52ec1e452b2e.png)
 
-After the countdown data is entered and validated (date and time validation is triggered via the dialog **OK** button), the application will persist the data in a **countdown.properties** file located in the same folder location the application was launched.
+After the countdown data is entered and validated (date and time validation is triggered via clicking the dialog **OK** button), the application will persist the data in a user node preferences file.
 
 To start the countdown select the **Configure->Start** menu item which will display the configured message and countdown in the main window as below.
 
