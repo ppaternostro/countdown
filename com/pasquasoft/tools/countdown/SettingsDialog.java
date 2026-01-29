@@ -12,9 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.text.ParseException;
-import java.util.Properties;
+import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
@@ -44,13 +43,13 @@ public class SettingsDialog extends JDialog implements ActionListener
   private JPanel center = new JPanel();
   private JPanel south = new JPanel();
 
-  private Properties prop;
+  private Preferences preferences;
 
-  public SettingsDialog(Frame owner, String title, boolean modal, Properties prop)
+  public SettingsDialog(Frame owner, String title, boolean modal)
   {
     super(owner, title, modal);
 
-    this.prop = prop;
+    preferences = Preferences.userNodeForPackage(Countdown.class);
 
     try
     {
@@ -60,14 +59,15 @@ public class SettingsDialog extends JDialog implements ActionListener
       dateField = new JFormattedTextField(dateMask);
       timeField = new JFormattedTextField(timeMask);
 
-      dateField.setText(prop.getProperty("countdown.date"));
-      timeField.setText(prop.getProperty("countdown.time"));
+      dateField.setText(preferences.get("Countdown.date", ""));
+      timeField.setText(preferences.get("Countdown.time", ""));
+
     }
     catch (ParseException pe)
     {
     }
 
-    textField.setText(prop.getProperty("countdown.text"));
+    textField.setText(preferences.get("Countdown.text", ""));
 
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
@@ -106,7 +106,7 @@ public class SettingsDialog extends JDialog implements ActionListener
       }
     });
 
-    colorChooser.setForeground(Color.decode(prop.getProperty("countdown.color", "0")));
+    colorChooser.setForeground(Color.decode(preferences.get("Countdown.color", "0")));
 
     getRootPane().setDefaultButton(ok);
 
@@ -140,11 +140,9 @@ public class SettingsDialog extends JDialog implements ActionListener
       {
         if (Util.isValidTime(timeField.getText()) && Util.isValidDate(dateField.getText()))
         {
-          prop.setProperty("countdown.date", dateField.getText());
-          prop.setProperty("countdown.time", timeField.getText());
-          prop.setProperty("countdown.text", textField.getText().trim());
-
-          Util.saveProperties(prop);
+          preferences.put("Countdown.date", dateField.getText());
+          preferences.put("Countdown.time", timeField.getText());
+          preferences.put("Countdown.text", textField.getText().trim());
 
           dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
         }
@@ -153,9 +151,9 @@ public class SettingsDialog extends JDialog implements ActionListener
           JOptionPane.showMessageDialog(this, "Entered date and/or time invalid!", "Error", JOptionPane.ERROR_MESSAGE);
         }
       }
-      catch (IOException ioe)
+      catch (Throwable th)
       {
-        JOptionPane.showMessageDialog(this, ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, th.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       }
     }
     else if (obj == cancel)
@@ -164,13 +162,13 @@ public class SettingsDialog extends JDialog implements ActionListener
     }
     else if (obj == colorChooser)
     {
-      String color = prop.getProperty("countdown.color", "0");
+      String color = preferences.get("Countdown.color", "0");
 
       Color selected = JColorChooser.showDialog(this, "Text Color", Color.decode(color));
 
       colorChooser.setForeground(selected == null ? Color.decode(color) : selected);
 
-      prop.setProperty("countdown.color", selected != null ? selected.hashCode() + "" : color);
+      preferences.put("Countdown.color", selected != null ? selected.hashCode() + "" : color);
     }
   }
 }

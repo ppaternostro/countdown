@@ -14,9 +14,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.TimerTask;
+import java.util.prefs.Preferences;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -61,7 +61,7 @@ public class CountdownFrame extends JFrame implements ActionListener
   private String time;
   private String textStr;
 
-  private Properties prop = Util.readProperties();
+  private Preferences preferences = Preferences.userNodeForPackage(Countdown.class);
 
   private java.util.Timer countdownTimer;
 
@@ -69,8 +69,8 @@ public class CountdownFrame extends JFrame implements ActionListener
   {
     super("Countdown");
 
-    date = prop.getProperty("countdown.date");
-    time = prop.getProperty("countdown.time");
+    date = preferences.get("Countdown.date", "");
+    time = preferences.get("Countdown.time", "");
 
     configureStop.setEnabled(false);
 
@@ -150,10 +150,10 @@ public class CountdownFrame extends JFrame implements ActionListener
 
     if (obj == configureSettings)
     {
-      new SettingsDialog(this, "Settings", true, prop);
+      new SettingsDialog(this, "Settings", true);
 
-      date = prop.getProperty("countdown.date");
-      time = prop.getProperty("countdown.time");
+      date = preferences.get("Countdown.date", "");
+      time = preferences.get("Countdown.time", "");
     }
     else if (obj == configureStart)
     {
@@ -171,7 +171,7 @@ public class CountdownFrame extends JFrame implements ActionListener
         configureStart.setEnabled(false);
         configureStop.setEnabled(true);
 
-        textStr = prop.getProperty("countdown.text");
+        textStr = preferences.get("Countdown.text", "");
 
         countdownTimer = new java.util.Timer();
         countdownTimer.scheduleAtFixedRate(new CountdownTask(), 0, 1000);
@@ -196,7 +196,7 @@ public class CountdownFrame extends JFrame implements ActionListener
     else if (obj == helpAbout)
     {
       JOptionPane.showMessageDialog(this,
-          "<html><center>Countdown Application<br>Pat Paternostro<br>Copyright &copy; 2005-2022</center></html>",
+          "<html><center>Countdown Application<br>Pat Paternostro<br>Copyright &copy; 2005-2026</center></html>",
           "About Countdown", JOptionPane.INFORMATION_MESSAGE);
     }
   }
@@ -234,7 +234,7 @@ public class CountdownFrame extends JFrame implements ActionListener
         int width = getWidth();
         int height = getHeight();
 
-        Color color = Color.decode(prop.getProperty("countdown.color", "0"));
+        Color color = Color.decode(preferences.get("Countdown.color", "0"));
 
         g.setColor(color);
         g.setFont(new Font("Arial", Font.BOLD, 20));
