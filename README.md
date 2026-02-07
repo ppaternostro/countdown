@@ -10,7 +10,7 @@ This application allows the user to set a specific date, time (in 24 hour format
 
 After the countdown data is entered and validated (date and time validation is triggered via clicking the dialog **OK** button), the application will persist the data in a user node preferences file.
 
-To start the countdown select the **Configure->Start** menu item which will display the configured message and countdown in the main window as below.
+To start the countdown, select the **Configure->Start** menu item which will display the configured message and countdown in the main window as below.
 
 ![image](https://user-images.githubusercontent.com/32653184/204161553-79d3bf25-974c-4cee-9f6f-4a28673f4791.png)
 
@@ -20,7 +20,7 @@ Once the countdown reaches the specified date and time the dialog below will dis
 
 The event occurrence dialog message is my homage to one of the greatest crooners of all time. You are of course welcome to change the message as you see fit.
 
-## Building
+## Build
 
 To build the application, in the project's root folder, execute the following from a terminal window
 
