@@ -1,4 +1,5 @@
 # countdown
+
 A countdown application.
 
 ![image](https://user-images.githubusercontent.com/32653184/204151587-3018db3c-24a4-4e7f-816a-7f2628fe603a.png)
@@ -18,3 +19,19 @@ Once the countdown reaches the specified date and time the dialog below will dis
 ![image](https://user-images.githubusercontent.com/32653184/204162648-0f51a29c-0e8a-434c-9bda-36d67ae49c43.png)
 
 The event occurrence dialog message is my homage to one of the greatest crooners of all time. You are of course welcome to change the message as you see fit.
+
+## Building
+
+To build the application, in the project's root folder, execute the following from a terminal window
+
+> mvnw package (use **./mvnw** for Unix/Linux based OSes)
+
+The command will create the following executable JAR file in the project's root folder **target** directory.
+
+- countdown-0.0.1-SNAPSHOT.jar
+
+Run the following from the terminal window to execute the application.
+
+```bash
+java -jar countdown-0.0.1-SNAPSHOT.jar
+```
