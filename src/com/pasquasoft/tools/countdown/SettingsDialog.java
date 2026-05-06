@@ -100,6 +100,7 @@ public class SettingsDialog extends JDialog implements ActionListener
 
     /* Add the window listener */
     addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosing(WindowEvent evt)
       {
         dispose();
@@ -130,6 +131,7 @@ public class SettingsDialog extends JDialog implements ActionListener
     return gbc;
   }
 
+  @Override
   public void actionPerformed(ActionEvent evt)
   {
     Object obj = evt.getSource();

@@ -13,7 +13,10 @@ import java.awt.event.WindowEvent;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Period;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
 import java.util.TimerTask;
 import java.util.prefs.Preferences;
@@ -33,13 +36,6 @@ public class CountdownFrame extends JFrame implements ActionListener
    * Generated serial version UID.
    */
   private static final long serialVersionUID = 4657914421139681570L;
-
-  private static final long SECONDS_IN_YEAR = 31557600;
-  private static final long SECONDS_IN_MONTH = 2629800;
-  private static final long SECONDS_IN_WEEK = 604800;
-  private static final long SECONDS_IN_DAY = 86400;
-  private static final long SECONDS_IN_HOUR = 3600;
-  private static final long SECONDS_IN_MINUTE = 60;
 
   private DrawPanel drawPanel = new DrawPanel();
 
@@ -98,14 +94,17 @@ public class CountdownFrame extends JFrame implements ActionListener
     /* Add the menu listener */
     configure.addMenuListener(new MenuListener() {
 
+      @Override
       public void menuCanceled(MenuEvent evt)
       {
       }
 
+      @Override
       public void menuDeselected(MenuEvent evt)
       {
       }
 
+      @Override
       public void menuSelected(MenuEvent evt)
       {
         configureStart.setEnabled(isValidConfigData() && !configureStop.isEnabled());
@@ -121,6 +120,7 @@ public class CountdownFrame extends JFrame implements ActionListener
 
     /* Add the window listener */
     addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosing(WindowEvent evt)
       {
         /* Exit gracefully */
@@ -144,6 +144,7 @@ public class CountdownFrame extends JFrame implements ActionListener
     setVisible(true);
   }
 
+  @Override
   public void actionPerformed(ActionEvent evt)
   {
     Object obj = evt.getSource();
@@ -157,7 +158,7 @@ public class CountdownFrame extends JFrame implements ActionListener
     }
     else if (obj == configureStart)
     {
-      countdownSeconds = calculateSeconds(date, time);
+      countdownSeconds = calculateCountdownSeconds(date, time);
       currentDateSeconds = ZonedDateTime.ofInstant(Instant.now(), TimeZone.getDefault().toZoneId()).toEpochSecond();
 
       if (currentDateSeconds >= countdownSeconds)
@@ -201,7 +202,7 @@ public class CountdownFrame extends JFrame implements ActionListener
     }
   }
 
-  private long calculateSeconds(String date, String time)
+  private long calculateCountdownSeconds(String date, String time)
   {
     String dateParts[] = date.split("/");
     String timeParts[] = time.split(":");
@@ -220,11 +221,12 @@ public class CountdownFrame extends JFrame implements ActionListener
 
   private class DrawPanel extends JPanel
   {
-    /**
+    /*
      * Generated serial version UID.
      */
     private static final long serialVersionUID = -6102645309158997819L;
 
+    @Override
     public void paintComponent(Graphics g)
     {
       super.paintComponent(g);
@@ -239,36 +241,11 @@ public class CountdownFrame extends JFrame implements ActionListener
         g.setColor(color);
         g.setFont(new Font("Arial", Font.BOLD, 20));
 
-        long diffInSeconds = countdownSeconds - currentDateSeconds;
-
-        long years = diffInSeconds / SECONDS_IN_YEAR;
-        diffInSeconds %= SECONDS_IN_YEAR;
-
-        long months = diffInSeconds / SECONDS_IN_MONTH;
-        diffInSeconds %= SECONDS_IN_MONTH;
-
-        long weeks = diffInSeconds / SECONDS_IN_WEEK;
-        diffInSeconds %= SECONDS_IN_WEEK;
-
-        long days = diffInSeconds / SECONDS_IN_DAY;
-        diffInSeconds %= SECONDS_IN_DAY;
-
-        long hours = diffInSeconds / SECONDS_IN_HOUR;
-        diffInSeconds %= SECONDS_IN_HOUR;
-
-        long minutes = diffInSeconds / SECONDS_IN_MINUTE;
-        diffInSeconds %= SECONDS_IN_MINUTE;
-
-        long seconds = diffInSeconds;
-
-        String dateStr = (years != 0 ? years + " year(s) " : "") + (months != 0 ? months + " month(s) " : "")
-            + (weeks != 0 ? weeks + " week(s) " : "") + (days != 0 ? days + " day(s) " : "")
-            + (hours != 0 ? hours + " hour(s) " : "") + (minutes != 0 ? minutes + " minute(s) " : "") + seconds
-            + " second(s) ";
+        String countdownStr = getCountdownString();
 
         /* Retrieve string width for centering purposes */
         FontMetrics fm = g.getFontMetrics();
-        int dateStrWidth = fm.stringWidth(dateStr);
+        int countdownStrWidth = fm.stringWidth(countdownStr);
         int textHeight = fm.getHeight();
 
         if (textStr != null && !textStr.equals(""))
@@ -277,13 +254,60 @@ public class CountdownFrame extends JFrame implements ActionListener
           g.drawString(textStr, (width - textStrWidth) / 2, height / 2 - textHeight);
         }
 
-        g.drawString(dateStr, (width - dateStrWidth) / 2, height / 2);
+        g.drawString(countdownStr, (width - countdownStrWidth) / 2, height / 2);
       }
+    }
+
+    private String getCountdownString()
+    {
+      ZoneId zone = ZoneId.systemDefault();
+
+      ZonedDateTime now = ZonedDateTime.now(zone);
+      ZonedDateTime target = Instant.ofEpochSecond(countdownSeconds).atZone(zone);
+
+      /*
+       * Calculate the period (years, months, days) which uses calendar logic
+       * (e.g., Feb 28 to Mar 28 is 1 month regardless of length)
+       */
+      Period period = Period.between(now.toLocalDate(), target.toLocalDate());
+
+      /*
+       * Adjust for the 'time' portion. If 'now' time is later than 'target'
+       * time, Period.between might over-count a day
+       */
+      long hours = ChronoUnit.HOURS.between(now, target) % 24;
+      long minutes = ChronoUnit.MINUTES.between(now, target) % 60;
+      long seconds = ChronoUnit.SECONDS.between(now, target) % 60;
+
+      // Refine days and weeks
+      long totalDays = period.getDays();
+      if (target.toLocalTime().isBefore(now.toLocalTime()))
+      {
+        totalDays--; // Adjust because a full calendar day hasn't elapsed yet
+      }
+
+      // Handle negative day adjustment wrapping into months
+      if (totalDays < 0)
+      {
+        // Complex calendar math: simplify by using ChronoUnit for total days
+        totalDays = ChronoUnit.DAYS.between(now.plus(period.withDays(0)), target);
+      }
+
+      long years = period.getYears();
+      long months = period.getMonths();
+      long weeks = totalDays / 7;
+      long days = totalDays % 7;
+
+      return (years != 0 ? years + " year(s) " : "") + (months != 0 ? months + " month(s) " : "")
+          + (weeks != 0 ? weeks + " week(s) " : "") + (days != 0 ? days + " day(s) " : "")
+          + (hours != 0 ? hours + " hour(s) " : "") + (minutes != 0 ? minutes + " minute(s) " : "") + seconds
+          + " second(s) ";
     }
   }
 
   private class CountdownTask extends TimerTask
   {
+    @Override
     public void run()
     {
       currentDateSeconds = ZonedDateTime.ofInstant(Instant.now(), TimeZone.getDefault().toZoneId()).toEpochSecond();
