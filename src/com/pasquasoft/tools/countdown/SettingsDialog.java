@@ -31,6 +31,11 @@ public class SettingsDialog extends JDialog implements ActionListener
    */
   private static final long serialVersionUID = -6821579667836387884L;
 
+  private static final String PREFERENCES_DATE = "Countdown.date";
+  private static final String PREFERENCES_TIME = "Countdown.time";
+  private static final String PREFERENCES_TEXT = "Countdown.text";
+  private static final String PREFERENCES_COLOR = "Countdown.color";
+
   private JTextField textField = new JTextField(20);
 
   private JFormattedTextField dateField;
@@ -59,15 +64,15 @@ public class SettingsDialog extends JDialog implements ActionListener
       dateField = new JFormattedTextField(dateMask);
       timeField = new JFormattedTextField(timeMask);
 
-      dateField.setText(preferences.get("Countdown.date", ""));
-      timeField.setText(preferences.get("Countdown.time", ""));
+      dateField.setText(preferences.get(PREFERENCES_DATE, ""));
+      timeField.setText(preferences.get(PREFERENCES_TIME, ""));
 
     }
     catch (ParseException pe)
     {
     }
 
-    textField.setText(preferences.get("Countdown.text", ""));
+    textField.setText(preferences.get(PREFERENCES_TEXT, ""));
 
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
@@ -107,7 +112,7 @@ public class SettingsDialog extends JDialog implements ActionListener
       }
     });
 
-    colorChooser.setForeground(Color.decode(preferences.get("Countdown.color", "0")));
+    colorChooser.setForeground(Color.decode(preferences.get(PREFERENCES_COLOR, "0")));
 
     getRootPane().setDefaultButton(ok);
 
@@ -142,9 +147,9 @@ public class SettingsDialog extends JDialog implements ActionListener
       {
         if (Util.isValidTime(timeField.getText()) && Util.isValidDate(dateField.getText()))
         {
-          preferences.put("Countdown.date", dateField.getText());
-          preferences.put("Countdown.time", timeField.getText());
-          preferences.put("Countdown.text", textField.getText().trim());
+          preferences.put(PREFERENCES_DATE, dateField.getText());
+          preferences.put(PREFERENCES_TIME, timeField.getText());
+          preferences.put(PREFERENCES_TEXT, textField.getText().trim());
 
           dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
         }
@@ -164,7 +169,7 @@ public class SettingsDialog extends JDialog implements ActionListener
     }
     else if (obj == colorChooser)
     {
-      String color = preferences.get("Countdown.color", "0");
+      String color = preferences.get(PREFERENCES_COLOR, "0");
 
       Color selected = JColorChooser.showDialog(this, "Text Color", Color.decode(color));
 

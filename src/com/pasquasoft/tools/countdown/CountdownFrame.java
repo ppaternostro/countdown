@@ -21,27 +21,40 @@ import java.util.TimeZone;
 import java.util.TimerTask;
 import java.util.prefs.Preferences;
 
+import javax.swing.AbstractButton;
+import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
 public class CountdownFrame extends JFrame implements ActionListener
 {
-  /**
+  /*
    * Generated serial version UID.
    */
   private static final long serialVersionUID = 4657914421139681570L;
+
+  private static final String PREFERENCES_LOOK_AND_FEEL = "Countdown.laf";
+  private static final String PREFERENCES_DATE = "Countdown.date";
+  private static final String PREFERENCES_TIME = "Countdown.time";
+  private static final String PREFERENCES_TEXT = "Countdown.text";
+  private static final String PREFERENCES_COLOR = "Countdown.color";
 
   private DrawPanel drawPanel = new DrawPanel();
 
   private JMenuBar mb = new JMenuBar();
 
   private JMenu configure = new JMenu("Configure");
+  private JMenu view = new JMenu("View");
+  private JMenu look = new JMenu("Look and Feel");
   private JMenu help = new JMenu("Help");
 
   private JMenuItem configureStart = new JMenuItem("Start");
@@ -49,6 +62,10 @@ public class CountdownFrame extends JFrame implements ActionListener
   private JMenuItem configureSettings = new JMenuItem("Settings...");
   private JMenuItem configureExit = new JMenuItem("Exit");
   private JMenuItem helpAbout = new JMenuItem("About...");
+
+  private ButtonGroup looksGroup = new ButtonGroup();
+
+  private JRadioButtonMenuItem looks[];
 
   private long countdownSeconds;
   private long currentDateSeconds;
@@ -65,8 +82,38 @@ public class CountdownFrame extends JFrame implements ActionListener
   {
     super("Countdown");
 
-    date = preferences.get("Countdown.date", "");
-    time = preferences.get("Countdown.time", "");
+    UIManager.LookAndFeelInfo[] installedLooks = UIManager.getInstalledLookAndFeels();
+
+    looks = new JRadioButtonMenuItem[installedLooks.length];
+
+    String defaultLaf = UIManager.getLookAndFeel().getName();
+
+    defaultLaf = preferences.get(PREFERENCES_LOOK_AND_FEEL, defaultLaf);
+
+    /*
+     * Create menu items, add action listener, set the action command to the
+     * Look and Feel class name, set selected menu item, and add to Look and
+     * Feel menu and group.
+     */
+    for (int i = 0; i < looks.length; i++)
+    {
+      String installedLaf = installedLooks[i].getName();
+
+      looks[i] = new JRadioButtonMenuItem(installedLaf);
+      looks[i].addActionListener(this);
+      looks[i].setActionCommand(installedLooks[i].getClassName());
+
+      if (installedLaf.equals(defaultLaf))
+      {
+        looks[i].setSelected(true);
+      }
+
+      looksGroup.add(looks[i]);
+      look.add(looks[i]);
+    }
+
+    date = preferences.get(PREFERENCES_DATE, "");
+    time = preferences.get(PREFERENCES_TIME, "");
 
     configureStop.setEnabled(false);
 
@@ -82,10 +129,12 @@ public class CountdownFrame extends JFrame implements ActionListener
     configure.add(configureSettings);
     configure.addSeparator();
     configure.add(configureExit);
+    view.add(look);
     help.add(helpAbout);
 
     /* Add menus to menubar */
     mb.add(configure);
+    mb.add(view);
     mb.add(help);
 
     /* Set menubar */
@@ -134,6 +183,16 @@ public class CountdownFrame extends JFrame implements ActionListener
       }
     });
 
+    /* Determine selected look and feel and ensure it's applied */
+    for (JRadioButtonMenuItem item : looks)
+    {
+      if (item.isSelected())
+      {
+        item.doClick();
+        break;
+      }
+    }
+
     /* Size the frame */
     setSize(400, 200);
 
@@ -153,8 +212,8 @@ public class CountdownFrame extends JFrame implements ActionListener
     {
       new SettingsDialog(this, "Settings", true);
 
-      date = preferences.get("Countdown.date", "");
-      time = preferences.get("Countdown.time", "");
+      date = preferences.get(PREFERENCES_DATE, "");
+      time = preferences.get(PREFERENCES_TIME, "");
     }
     else if (obj == configureStart)
     {
@@ -172,7 +231,7 @@ public class CountdownFrame extends JFrame implements ActionListener
         configureStart.setEnabled(false);
         configureStop.setEnabled(true);
 
-        textStr = preferences.get("Countdown.text", "");
+        textStr = preferences.get(PREFERENCES_TEXT, "");
 
         countdownTimer = new java.util.Timer();
         countdownTimer.scheduleAtFixedRate(new CountdownTask(), 0, 1000);
@@ -199,6 +258,25 @@ public class CountdownFrame extends JFrame implements ActionListener
       JOptionPane.showMessageDialog(this,
           "<html><center>Countdown Application<br>Pat Paternostro<br>Copyright &copy; 2005-2026</center></html>",
           "About Countdown", JOptionPane.INFORMATION_MESSAGE);
+    }
+    else if (obj instanceof JRadioButtonMenuItem)
+    {
+      try
+      {
+        /*
+         * The radio button menu item's action command is set to the associated
+         * Look and Feel class name.
+         */
+        AbstractButton ab = ((AbstractButton) obj);
+        UIManager.setLookAndFeel(ab.getActionCommand());
+        preferences.put(PREFERENCES_LOOK_AND_FEEL, ab.getText());
+        preferences.flush();
+        SwingUtilities.updateComponentTreeUI(CountdownFrame.this);
+      }
+      catch (final Throwable th)
+      {
+        JOptionPane.showMessageDialog(CountdownFrame.this, th.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
     }
   }
 
@@ -236,7 +314,7 @@ public class CountdownFrame extends JFrame implements ActionListener
         int width = getWidth();
         int height = getHeight();
 
-        Color color = Color.decode(preferences.get("Countdown.color", "0"));
+        Color color = Color.decode(preferences.get(PREFERENCES_COLOR, "0"));
 
         g.setColor(color);
         g.setFont(new Font("Arial", Font.BOLD, 20));
