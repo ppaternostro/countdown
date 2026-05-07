@@ -10,10 +10,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -339,42 +339,59 @@ public class CountdownFrame extends JFrame implements ActionListener
     private String getCountdownString()
     {
       ZoneId zone = ZoneId.systemDefault();
-
       ZonedDateTime now = ZonedDateTime.now(zone);
       ZonedDateTime target = Instant.ofEpochSecond(countdownSeconds).atZone(zone);
 
-      /*
-       * Calculate the period (years, months, days) which uses calendar logic
-       * (e.g., Feb 28 to Mar 28 is 1 month regardless of length)
-       */
-      Period period = Period.between(now.toLocalDate(), target.toLocalDate());
+      LocalDate startDate = now.toLocalDate();
+      LocalTime startTime = now.toLocalTime();
+      LocalDate endDate = target.toLocalDate();
+      LocalTime endTime = target.toLocalTime();
 
-      /*
-       * Adjust for the 'time' portion. If 'now' time is later than 'target'
-       * time, Period.between might over-count a day
-       */
-      long hours = ChronoUnit.HOURS.between(now, target) % 24;
-      long minutes = ChronoUnit.MINUTES.between(now, target) % 60;
-      long seconds = ChronoUnit.SECONDS.between(now, target) % 60;
+      // Calendar arithmetic (Years, Months, Days)
+      long years = ChronoUnit.YEARS.between(startDate, endDate);
+      LocalDate afterYears = startDate.plusYears(years);
 
-      // Refine days and weeks
-      long totalDays = period.getDays();
-      if (target.toLocalTime().isBefore(now.toLocalTime()))
+      long months = ChronoUnit.MONTHS.between(afterYears, endDate);
+      LocalDate afterMonths = afterYears.plusMonths(months);
+
+      long days = ChronoUnit.DAYS.between(afterMonths, endDate);
+
+      // Time arithmetic (Hours, Minutes, Seconds)
+      Duration timeDiff = Duration.between(startTime, endTime);
+      long totalSecs = timeDiff.getSeconds();
+
+      // If target time is earlier than start time, borrow one calendar day
+      if (totalSecs < 0)
       {
-        totalDays--; // Adjust because a full calendar day hasn't elapsed yet
+        days--;
+        totalSecs += 86_400;
       }
 
-      // Handle negative day adjustment wrapping into months
-      if (totalDays < 0)
+      // Normalize negative days by borrowing from the exact previous month/year
+      while (days < 0)
       {
-        // Complex calendar math: simplify by using ChronoUnit for total days
-        totalDays = ChronoUnit.DAYS.between(now.plus(period.withDays(0)), target);
+        afterMonths = afterMonths.minusMonths(1);
+        days += afterMonths.lengthOfMonth();
+        
+        if (months == 0)
+        {
+          years--;
+          months = 11;
+        }
+        else
+        {
+          months--;
+        }
       }
 
-      long years = period.getYears();
-      long months = period.getMonths();
-      long weeks = totalDays / 7;
-      long days = totalDays % 7;
+      // Convert remaining days to weeks and days
+      long weeks = days / 7;
+      days %= 7;
+
+      long hours = totalSecs / 3_600;
+      totalSecs %= 3_600;
+      long minutes = totalSecs / 60;
+      long seconds = totalSecs % 60;
 
       return (years != 0 ? years + " year(s) " : "") + (months != 0 ? months + " month(s) " : "")
           + (weeks != 0 ? weeks + " week(s) " : "") + (days != 0 ? days + " day(s) " : "")
