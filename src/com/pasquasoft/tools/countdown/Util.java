@@ -9,7 +9,7 @@ import java.util.Objects;
 public class Util
 {
   private static final String REGEX_TIME_MASK = "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$";
-  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy")
+  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MM/dd/uuuu")
       .withResolverStyle(ResolverStyle.STRICT);
 
   public static boolean isValidDate(String dateStr)
